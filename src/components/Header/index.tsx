@@ -1,20 +1,24 @@
-import React from 'react';
+import React from "react";
 
-import styles from './styles.module.scss'
-import { SignInButton } from '../SignInButton';
-
+import styles from "./styles.module.scss";
+import { SignInButton } from "../SignInButton";
+import { useSession } from 'next-auth/react'
 export const Header: React.FC = () => {
   return (
-    <header className={styles.headerContainer}>
+    <>
+      <header className={styles.headerContainer}>
         <div className={styles.headerContent}>
-            <img src="/images/logo.svg" alt="ig.news" />
-            <nav>
-                <a href="" className={styles.active}>Home</a>
-                <a href="">Posts</a>
-            </nav>
+          <img src="/images/logo.svg" alt="ig.news" />
+          <nav>
+            <a href="" className={styles.active}>
+              Home
+            </a>
+            <a href="">Posts</a>
+          </nav>
 
-            <SignInButton />
+          <SignInButton />
         </div>
-    </header>
-  )
-}
+      </header>
+    </>
+  );
+};
