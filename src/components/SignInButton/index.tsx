@@ -8,9 +8,8 @@ import { FiX } from 'react-icons/fi'
 //
 
 export const SignInButton: React.FC = () => {
-    const session = useSession().data;
-    console.log('session', session);
-    const isUserLoggedIn = session;
+    const isUserLoggedIn = useSession().data;
+    console.log('session', isUserLoggedIn);
 
   return isUserLoggedIn ? (
     <button 
@@ -19,7 +18,7 @@ export const SignInButton: React.FC = () => {
         onClick={() => signOut()}
     >
         <FaGithub color='#04d361' /> 
-        {session.user?.name}
+        {isUserLoggedIn.user?.name}
         <FiX color='#737380' className={styles.closeIcon} />
     </button>
   ) : (
