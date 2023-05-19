@@ -12,6 +12,8 @@ const ActiveLink: React.FC<IActiveLinkProps> = ({
   activeClassName,
   ...rest
 }) => {
+
+  console.log('teste activeClassName', activeClassName)
   const { asPath } = useRouter();
 
   const className = asPath === rest.href ? activeClassName : "";

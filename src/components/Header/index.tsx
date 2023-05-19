@@ -17,7 +17,7 @@ export const Header: React.FC = () => {
             <ActiveLink activeClassName={styles.active} href="/">
               <span>Home</span>
             </ActiveLink>
-            <ActiveLink activeClassName={styles.active} href="/posts" prefetch>
+            <ActiveLink activeClassName={styles.active} href="/posts">
               <span>Posts</span>
             </ActiveLink>
           </nav>

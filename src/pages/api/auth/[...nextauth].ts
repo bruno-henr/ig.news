@@ -1,5 +1,5 @@
-import { query as q } from 'faunadb';
-import NextAuth from "next-auth/next";
+import { query as q } from "faunadb";
+import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 
 import { fauna } from "../../../services/fauna";
@@ -15,8 +15,37 @@ export default NextAuth({
   secret: process.env.FAUNADB_KEY,
   debug: true,
   callbacks: {
-    async signIn({user, account, profile}) {
-      console.log('user =>', user);
+    async session(session) {
+      try {
+        const userActiveSubscription = await fauna.query(
+          q.Get(
+            q.Intersection([
+              q.Match(
+                q.Index("subscription_by_user_ref"),
+                q.Select(
+                  "ref",
+                  q.Get(
+                    q.Match(
+                      q.Index("user_by_email"),
+                      q.Casefold(session.user.email)
+                    )
+                  )
+                )
+              ),
+              q.Match(q.Index("subscription_by_status"), "active"),
+            ])
+          )
+        );
+
+        console.log('userActiveSubscription ', userActiveSubscription)
+  
+        return { ...session, activeSubscription: userActiveSubscription };
+      } catch (error) {
+        return { ...session, activeSubscription: null };
+      }
+    },
+    async signIn({ user, account, profile }) {
+      console.log("user =>", user);
       const { email } = user;
 
       try {
@@ -28,12 +57,10 @@ export default NextAuth({
               )
             ),
             q.Create(q.Collection("users"), { data: { email } }),
-            q.Get(
-              q.Match(q.Index("user_by_email"), q.Casefold(user.email))
-            )
+            q.Get(q.Match(q.Index("user_by_email"), q.Casefold(user.email)))
           )
         );
-        console.log('deu certo')
+        console.log("deu certo");
         return true;
       } catch (error) {
         console.log("error faunadb", error);

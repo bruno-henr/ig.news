@@ -8,24 +8,23 @@ import { FiX } from 'react-icons/fi'
 //
 
 export const SignInButton: React.FC = () => {
-    const isUserLoggedIn = useSession().data;
-    console.log('session', isUserLoggedIn);
+    const session = useSession().data;
 
-  return isUserLoggedIn ? (
+  return session ? (
     <button 
         type='button'
         className={styles.signInButton}
-        onClick={() => signOut()}
+        onClick={async () => signOut()}
     >
         <FaGithub color='#04d361' /> 
-        {isUserLoggedIn.user?.name}
+        {session.user?.name}
         <FiX color='#737380' className={styles.closeIcon} />
     </button>
   ) : (
     <button 
         type='button'
         className={styles.signInButton}
-        onClick={() => signIn('github')}
+        onClick={async () => await signIn('github')}
     >
         <FaGithub color='#eba417' /> 
         Sign in with github

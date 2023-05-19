@@ -12,7 +12,6 @@ interface HomeProps {
 }
 
 export default function Home({ product }: HomeProps) {
-  console.log("dados do produto", product);
   return (
     <>
       <Head>
