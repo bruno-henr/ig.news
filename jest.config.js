@@ -12,7 +12,10 @@
 const config = {
     verbose: true,
     
-    testEnvironment: "jsdom"
+    testEnvironment: "jsdom",
+    moduleNameMapper: {
+        "\\.(scss|css|sass)$": "identity-obj-proxy"
+    }
 };
 
 module.exports = config;
