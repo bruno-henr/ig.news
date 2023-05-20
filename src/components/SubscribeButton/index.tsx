@@ -1,48 +1,48 @@
-import React from "react";
-
+import { useSession, signIn } from 'next-auth/client';
+import { useRouter } from 'next/router';
+import { api } from '../../services/api';
+import { getStripeJs } from '../../services/stripe-js';
 import styles from "./styles.module.scss";
-import { useSession, signIn } from "next-auth/react";
-import { api } from '../../services/api'
-import { getStripeJs } from "@/services/stripe-js";
-import { useRouter } from "next/router";
+
 interface SubscribeButtonProps {
-  priceId: string;
+    priceId: string;
 }
 
-const SubscribeButton: React.FC<SubscribeButtonProps> = ({ priceId }) => {
-  const session = useSession();
-  const router = useRouter()
-  const handleSubscribe = async () => {
-    if (!session) {
-      signIn('github');
-      return 
+export function SubscribeButton({ priceId } :SubscribeButtonProps) {
+
+    const [session] = useSession();
+
+    const router = useRouter();
+
+    async function handleSubscribe() {
+        if (!session) {
+            signIn('github')
+            return;
+        }
+
+        if (session.activeSubscription) {
+
+            router.push('/posts');
+            return;
+        }
+
+        try {
+            const response = await api.post('/subscribe')
+            const { sessionId } = response.data;
+            const stripe = await getStripeJs()
+            await stripe.redirectToCheckout({sessionId: sessionId})
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    if(session.activeSubscription) {
-      router.push('/posts')
-      return 
-    }
-
-    // criacao da checkkout session
-    try {
-      const response = await api.post('/subscribe');
-
-      const { sessionId } = response.data;
-      console.log('session id', sessionId)
-
-      const stripe = await getStripeJs();
-
-      await stripe?.redirectToCheckout({ sessionId })
-    } catch (error:any) {
-      alert(error.message)
-    }
-  };
-
-  return (
-    <button type="button" className={styles.subscribeButton} onClick={handleSubscribe}>
-      Subscrive now
-    </button>
-  );
-};
-
-export default SubscribeButton;
+    return (
+        <button 
+            type="button" 
+            className={styles.subscribeButton}
+            onClick={handleSubscribe}
+        >
+            Subscribe Now
+        </button>
+    );
+}

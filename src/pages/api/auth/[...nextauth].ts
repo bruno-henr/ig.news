@@ -1,19 +1,20 @@
 import { query as q } from "faunadb";
+
 import NextAuth from "next-auth";
-import GitHubProvider from "next-auth/providers/github";
+import { session } from "next-auth/client";
+import Providers from "next-auth/providers";
 
 import { fauna } from "../../../services/fauna";
 
 export default NextAuth({
   providers: [
-    GitHubProvider({
+    Providers.GitHub({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      scope: "read:user",
+      scope: "read:user, read:email",
     }),
   ],
-  secret: process.env.FAUNADB_KEY,
-  debug: true,
+
   callbacks: {
     async session(session) {
       try {
@@ -21,7 +22,7 @@ export default NextAuth({
           q.Get(
             q.Intersection([
               q.Match(
-                q.Index("subscription_by_user_ref"),
+                q.Index("substription_by_user_ref"),
                 q.Select(
                   "ref",
                   q.Get(
@@ -36,16 +37,20 @@ export default NextAuth({
             ])
           )
         );
-
-        console.log('userActiveSubscription ', userActiveSubscription)
   
-        return { ...session, activeSubscription: userActiveSubscription };
-      } catch (error) {
-        return { ...session, activeSubscription: null };
+        return {
+          ...session,
+          activeSubscription: userActiveSubscription
+        };
+      } catch {
+        return {
+          ...session,
+          activeSubscription: null,
+        };
       }
     },
-    async signIn({ user, account, profile }) {
-      console.log("user =>", user);
+
+    async signIn(user, accont, profile) {
       const { email } = user;
 
       try {
@@ -60,10 +65,8 @@ export default NextAuth({
             q.Get(q.Match(q.Index("user_by_email"), q.Casefold(user.email)))
           )
         );
-        console.log("deu certo");
         return true;
-      } catch (error) {
-        console.log("error faunadb", error);
+      } catch {
         return false;
       }
     },
